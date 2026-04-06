@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>命理排盤：紅帖八字查詢</title>
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --gold: #f5e0a3; --deep-red: #8b0000; --card-red: #a52a2a; --accent-gold: #ffd700; --text-dark: #3e0a0a; }
         body { font-family: "PingFang TC", "Microsoft JhengHei", serif; background: var(--deep-red); color: var(--gold); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
@@ -13,14 +12,12 @@
         .input-group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; }
         input { width: 100%; padding: 14px; border-radius: 10px; border: 2px solid var(--accent-gold); background: #fff8e1; color: var(--text-dark); box-sizing: border-box; font-size: 1.1rem; font-weight: bold; }
-        button { width: 100%; padding: 16px; background: var(--accent-gold); border: 2px solid var(--deep-red); border-radius: 12px; color: var(--deep-red); font-weight: 900; font-size: 1.2rem; cursor: pointer; margin-top: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .result-box { margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 15px; border: 1px solid var(--accent-gold); line-height: 1.9; display: none; }
-        #lunarDate { font-size: 1.3rem; font-weight: 900; color: #fff; text-align: center; margin-bottom: 15px; }
+        button { width: 100%; padding: 16px; background: var(--accent-gold); border: 2px solid var(--deep-red); border-radius: 12px; color: var(--deep-red); font-weight: 900; font-size: 1.2rem; cursor: pointer; margin-top: 15px; }
+        .result-box { margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 15px; border: 1px solid var(--accent-gold); display: none; line-height: 1.8; }
         .bazi-grid { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; margin: 20px 0; border: 2px solid var(--accent-gold); background: var(--deep-red); }
-        .bazi-item { padding: 12px; border: 1px solid var(--accent-gold); }
-        .bazi-label { color: var(--accent-gold); font-size: 0.9rem; font-weight: bold; }
-        .bazi-content { font-size: 1.2rem; font-weight: 900; color: #fff; margin-top: 5px; }
-        .info-text { margin-top: 10px; border-top: 1px solid rgba(255,235,59,0.3); padding-top: 10px; font-size: 1rem; }
+        .bazi-item { padding: 10px; border: 1px solid var(--accent-gold); }
+        .bazi-label { color: var(--accent-gold); font-size: 0.8rem; }
+        .bazi-content { font-size: 1.2rem; font-weight: bold; color: #fff; }
     </style>
 </head>
 <body>
@@ -38,60 +35,74 @@
     <button onclick="calculate()">即刻排盤 • 窺探天機</button>
 
     <div id="result" class="result-box">
-        <div id="lunarDate"></div>
         <div class="bazi-grid">
-            <div class="bazi-item"><div class="bazi-label">年柱</div><div id="yearGZ" class="bazi-content"></div></div>
-            <div class="bazi-item"><div class="bazi-label">月柱</div><div id="monthGZ" class="bazi-content"></div></div>
-            <div class="bazi-item"><div class="bazi-label">日柱</div><div id="dayGZ" class="bazi-content"></div></div>
-            <div class="bazi-item"><div class="bazi-label">時柱</div><div id="hourGZ" class="bazi-content"></div></div>
+            <div class="bazi-item"><div class="bazi-label">年柱</div><div id="yGZ" class="bazi-content"></div></div>
+            <div class="bazi-item"><div class="bazi-label">月柱</div><div id="mGZ" class="bazi-content"></div></div>
+            <div class="bazi-item"><div class="bazi-label">日柱</div><div id="dGZ" class="bazi-content"></div></div>
+            <div class="bazi-item"><div class="bazi-label">時柱</div><div id="hGZ" class="bazi-content"></div></div>
         </div>
-        <div class="info-text">生肖屬相：<span id="zodiac" style="color:#ffeb3b; font-weight:bold;"></span></div>
-        <div id="shouSheng" class="info-text"></div>
-        <div id="starLord" class="info-text"></div>
+        <div id="shouSheng"></div>
+        <div id="starLord"></div>
     </div>
 </div>
 
 <script>
-function calculate() {
-    // 防呆：檢查工具庫是否成功加載
-    if (typeof Solar === 'undefined') {
-        alert("系統工具庫載入失敗，請檢查網路或重新整理頁面！");
-        return;
-    }
+// 內建簡易干支推算邏輯 (不需要外部庫)
+const T_GAN = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
+const T_ZHI = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
 
+function calculate() {
     const dVal = document.getElementById('birthDate').value;
     const tVal = document.getElementById('birthTime').value || "0000";
+    if (dVal.length !== 8) return alert("日期格式錯誤");
 
-    if (dVal.length !== 8) { alert("日期格式需為8位數字"); return; }
+    const year = parseInt(dVal.substring(0, 4));
+    const month = parseInt(dVal.substring(4, 6));
+    const day = parseInt(dVal.substring(6, 8));
+    const hour = parseInt(tVal.substring(0, 2));
 
-    const y = parseInt(dVal.substring(0, 4));
-    const m = parseInt(dVal.substring(4, 6));
-    const d = parseInt(dVal.substring(6, 8));
-    const h = parseInt(tVal.substring(0, 2));
-    const min = parseInt(tVal.substring(2, 4));
+    // 1. 推算年柱 (以西元為準)
+    const yGan = T_GAN[year % 10];
+    const yZhi = T_ZHI[year % 12];
+    const yearGZ = yGan + yZhi;
 
-    try {
-        const solar = Solar.fromYmdHms(y, m, d, h, min, 0);
-        const lunar = solar.getLunar();
-        const eightChar = lunar.getEightChar();
+    // 2. 推算日柱 (公式法：高氏日柱公式簡化版)
+    // 這裡使用基準日 2000/01/01 為 甲戌日 (10, 10)
+    const baseDate = new Date(2000, 0, 1);
+    const targetDate = new Date(year, month - 1, day);
+    const diffDays = Math.floor((targetDate - baseDate) / (24 * 3600 * 1000));
+    
+    const GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+    const ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+    
+    // 基準點偏移計算
+    let dGanIdx = (diffDays % 10 + 10 + 0) % 10; // 2000/1/1 是甲日
+    let dZhiIdx = (diffDays % 12 + 12 + 10) % 12; // 2000/1/1 是戌日
+    const dayGZ = GAN[dGanIdx] + ZHI[dZhiIdx];
 
-        document.getElementById('result').style.display = 'block';
-        document.getElementById('lunarDate').innerText = `農曆：${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
-        document.getElementById('zodiac').innerText = `${lunar.getYearShengXiao()} (${lunar.getYearShengXiaoByGanzhi()})`;
-        
-        document.getElementById('yearGZ').innerText = eightChar.getYear();
-        document.getElementById('monthGZ').innerText = eightChar.getMonth();
-        document.getElementById('dayGZ').innerText = eightChar.getDay();
-        document.getElementById('hourGZ').innerText = eightChar.getTime();
+    // 3. 推算時柱 (五鼠遁元)
+    const hourZhiIdx = (Math.floor((hour + 1) / 2) % 12);
+    const hourZhi = ZHI[hourZhiIdx];
+    // 五鼠遁法：甲己還加甲...
+    const startGanIdx = (dGanIdx % 5) * 2;
+    const hourGan = GAN[(startGanIdx + hourZhiIdx) % 10];
+    const hourGZ = hourGan + hourZhi;
 
-        const ssMap = { "甲":"三萬三千貫","乙":"四萬貫","丙":"三萬八千貫","丁":"七萬貫","戊":"五萬四千貫","己":"九萬貫","庚":"五萬En貫","辛":"三萬二千貫","壬":"七萬二千貫","癸":"五萬貫" };
-        document.getElementById('shouSheng').innerHTML = `<b>受生錢：</b>${ssMap[eightChar.getYear().substring(0,1)] || "查無資料"}`;
-        
-        const starMap = { "子":"貪狼","丑":"巨門","寅":"祿存","卯":"文曲","辰":"廉貞","巳":"武曲","午":"破軍","未":"貪狼","申":"巨門","酉":"祿存","戌":"文曲","亥":"廉貞" };
-        document.getElementById('starLord').innerHTML = `<b>本命星君：</b>${starMap[eightChar.getYear().substring(1,2)] || "查無資料"}`;
-    } catch (e) {
-        alert("日期輸入錯誤，請確認！");
-    }
+    // 4. 月柱 (簡化處理)
+    const monthGZ = "待查節氣"; // 月柱需精準節氣，此版先顯示提醒
+
+    // 顯示結果
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('yGZ').innerText = yearGZ;
+    document.getElementById('mGZ').innerText = monthGZ;
+    document.getElementById('dGZ').innerText = dayGZ;
+    document.getElementById('hGZ').innerText = hourGZ;
+
+    const ssMap = { "甲":"三萬三千貫","乙":"四萬貫","丙":"三萬八千貫","丁":"七萬貫","戊":"五萬四千貫","己":"九萬貫","庚":"五萬一千貫","辛":"三萬二千貫","壬":"七萬二千貫","癸":"五萬貫" };
+    document.getElementById('shouSheng').innerHTML = `<b>受生錢：</b>${ssMap[yGan] || "查無資料"}`;
+    
+    const starMap = { "子":"貪狼","丑":"巨門","寅":"祿存","卯":"文曲","辰":"廉貞","巳":"武曲","午":"破軍","未":"貪狼","申":"巨門","酉":"祿存","戌":"文曲","亥":"廉貞" };
+    document.getElementById('starLord').innerHTML = `<b>本命星君：</b>${starMap[yZhi] || "查無資料"}`;
 }
 </script>
 </body>
