@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月底救星：今天吃什麼？</title>
+    <style>
+        :root { --bg: #3e2723; --card: #5d4037; --accent: #ffeb3b; --danger: #f44336; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 400px; background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { text-align: center; color: var(--accent); font-size: 1.5rem; }
+        
+        /* 抽籤顯示區 */
+        .slot-machine { background: #000; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; border: 3px dashed var(--accent); }
+        #result-display { font-size: 1.8rem; font-weight: bold; min-height: 2.5rem; color: #fff; }
+        #comment-display { font-size: 0.9rem; color: #bdbdbd; margin-top: 10px; }
+
+        /* 食材勾選區 */
+        .ingredient-section { margin-top: 20px; }
+        .chip-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .chip { background: #795548; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
+        .chip.active { background: var(--accent); color: #000; font-weight: bold; }
+
+        /* 按鈕風格 */
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-draw { background: var(--accent); color: #000; }
+        .btn-ai { background: #4caf50; color: #fff; }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏜️ 月底救星 App</h1>
+    
+    <div class="slot-machine">
+        <div id="result-display">命運轉盤待機中...</div>
+        <div id="comment-display">準備好面對現實了嗎？</div>
+    </div>
+
+    <button class="btn-draw" onclick="drawMeal()">命運抽籤 (早午晚餐)</button>
+
+    <hr style="border: 0.5px solid #795548; margin: 20px 0;">
+
+    <div class="ingredient-section">
+        <label>🏠 冰箱裡還剩什麼：</label>
+        <div class="chip-container" id="ingredient-list"></div>
+    </div>
+
+    <button class="btn-ai" onclick="askAI()">🧙‍♂️ 召喚 AI 剩食大廚</button>
+</div>
+
+<script>
+    // 1. 惡搞資料庫
+    const mealPool = [
+        { name: "路邊乾淨黃土", comment: "天然礦物質，口感紮實且飽足。" },
+        { name: "西北風吃到飽", comment: "零熱量、高氣壓，減肥首選。" },
+        { name: "望梅止渴 (空碗)", comment: "看著空碗冥想，心誠則靈。" },
+        { name: "隔壁桌的香氣", comment: "聞一下不用錢，深呼吸就飽了。" },
+        { name: "夢裡的戰斧牛排", comment: "快去睡覺，夢裡什麼都有。" }
+    ];
+
+    const ingredients = ["花椰菜", "地瓜", "雞蛋", "米酒", "剩飯", "泡麵", "空氣"];
+    let selectedIngredients = [];
+
+    // 2. 初始化食材清單
+    const listCont = document.getElementById('ingredient-list');
+    ingredients.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'chip';
+        div.innerText = item;
+        div.onclick = () => {
+            div.classList.toggle('active');
+            if(selectedIngredients.includes(item)) {
+                selectedIngredients = selectedIngredients.filter(i => i !== item);
+            } else {
+                selectedIngredients.push(item);
+            }
+        };
+        listCont.appendChild(div);
+    });
+
+    // 3. 抽籤邏輯
+    function drawMeal() {
+        const display = document.getElementById('result-display');
+        const comment = document.getElementById('comment-display');
+        display.innerText = "命運旋轉中...";
+        setTimeout(() => {
+            const random = mealPool[Math.floor(Math.random() * mealPool.length)];
+            display.innerText = random.name;
+            comment.innerText = random.comment;
+        }, 800);
+    }
+
+    // 4. AI 大廚邏輯
+    function askAI() {
+        if(selectedIngredients.length === 0) {
+            alert("你連空氣都沒勾，AI 也沒辦法變魔術！");
+            return;
+        }
+        const items = selectedIngredients.join('、');
+        alert(`【AI 大廚建議】\n既然你有：${items}\n建議全部丟進鍋裡煮成「全家福大亂鬥」！記得加點米酒去腥！`);
+    }
+</script>
+
+</body>
+</html>
