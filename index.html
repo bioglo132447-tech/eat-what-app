@@ -3,107 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>命理排盤：紅帖生辰八字查詢</title>
+    <title>命理排盤：紅帖八字查詢</title>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
-        :root { 
-            --gold: #f5e0a3; /* 柔和金色，適合閱讀 */
-            --deep-red: #8b0000; /* 深紅色背景 */
-            --card-red: #a52a2a; /* 卡片亮紅色 */
-            --accent-gold: #ffd700; /* 按鈕與強調用純金色 */
-            --text-dark: #3e0a0a; /* 輸入框文字用暗紅色 */
-        }
-        
-        body { 
-            font-family: "PingFang TC", "Microsoft JhengHei", "Noto Serif TC", serif; 
-            background: var(--deep-red); /* 深紅背景 */
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM3NTAwMDAiIGZpbGwtb3BhY2l0eT0iMC4zIj48cGF0aCBkPSJNMDAgaDQuMjh2SDB2NGgydjJoNHYyaDJ2MmgydjJoMnYySDQwaDR2NEgwVjB6bTggOGg0djRIMHoiLz48L2c+PC9nPjwvc3ZnPg=='); /* 新增淡淡的復古紋理 */
-            color: var(--gold); 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh;
-        }
-        
-        .container { 
-            width: 100%; 
-            max-width: 500px; 
-            background: var(--card-red); /* 卡片亮紅 */
-            padding: 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
-            border: 3px double var(--accent-gold); /* 金色雙邊框 */
-        }
-        
-        h1 { 
-            text-align: center; 
-            color: var(--accent-gold); 
-            font-size: 1.6rem; 
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
-            margin-bottom: 25px;
-            font-weight: 900;
-        }
-        
+        :root { --gold: #f5e0a3; --deep-red: #8b0000; --card-red: #a52a2a; --accent-gold: #ffd700; --text-dark: #3e0a0a; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", serif; background: var(--deep-red); color: var(--gold); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
+        .container { width: 100%; max-width: 500px; background: var(--card-red); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 3px double var(--accent-gold); box-sizing: border-box; }
+        h1 { text-align: center; color: var(--accent-gold); font-size: 1.6rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 25px; }
         .input-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 8px; color: var(--gold); font-weight: bold; }
-        
-        input { 
-            width: 100%; 
-            padding: 14px; 
-            border-radius: 10px; 
-            border: 2px solid var(--accent-gold); 
-            background: #fff8e1; /* 淡米色輸入框，提升可讀性 */
-            color: var(--text-dark); /* 暗紅色文字 */
-            box-sizing: border-box; 
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-        
-        button { 
-            width: 100%; 
-            padding: 16px; 
-            background: var(--accent-gold); /* 純金按鈕 */
-            border: 2px solid var(--deep-red); 
-            border-radius: 12px; 
-            color: var(--deep-red); /* 按鈕文字用深紅 */
-            font-weight: 900; 
-            font-size: 1.2rem;
-            cursor: pointer; 
-            margin-top: 15px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: all 0.2s;
-        }
-        
-        button:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        
-        .result-box { 
-            margin-top: 25px; 
-            padding: 20px; 
-            background: rgba(0,0,0,0.3); /* 半透明黑色背景，突顯文字 */
-            border-radius: 15px; 
-            border: 1px solid var(--accent-gold); 
-            line-height: 1.9; 
-            display: none; 
-        }
-        
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input { width: 100%; padding: 14px; border-radius: 10px; border: 2px solid var(--accent-gold); background: #fff8e1; color: var(--text-dark); box-sizing: border-box; font-size: 1.1rem; font-weight: bold; }
+        button { width: 100%; padding: 16px; background: var(--accent-gold); border: 2px solid var(--deep-red); border-radius: 12px; color: var(--deep-red); font-weight: 900; font-size: 1.2rem; cursor: pointer; margin-top: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .result-box { margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 15px; border: 1px solid var(--accent-gold); line-height: 1.9; display: none; }
         #lunarDate { font-size: 1.3rem; font-weight: 900; color: #fff; text-align: center; margin-bottom: 15px; }
-        
-        .bazi-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            text-align: center; 
-            margin: 20px 0; 
-            border: 2px solid var(--accent-gold); 
-            background: var(--deep-red);
-        }
-        
+        .bazi-grid { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; margin: 20px 0; border: 2px solid var(--accent-gold); background: var(--deep-red); }
         .bazi-item { padding: 12px; border: 1px solid var(--accent-gold); }
         .bazi-label { color: var(--accent-gold); font-size: 0.9rem; font-weight: bold; }
-        .bazi-content { font-size: 1.2rem; font-weight: 900; color: #fff; }
-        
-        #zodiac { color: #ffeb3b; font-weight: 900; font-size: 1.1rem; }
-        
-        .info-text { margin-top: 10px; border-top: 1px solid rgba(255,235,59,0.3); padding-top: 10px; }
+        .bazi-content { font-size: 1.2rem; font-weight: 900; color: #fff; margin-top: 5px; }
+        .info-text { margin-top: 10px; border-top: 1px solid rgba(255,235,59,0.3); padding-top: 10px; font-size: 1rem; }
+        #zodiac { color: #ffeb3b; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -112,12 +30,12 @@
     <h1>📜 開運紅帖：八字查詢</h1>
     
     <div class="input-group">
-        <label>輸入國曆出生年月日 (如 19990401)</label>
-        <input type="number" id="birthDate" placeholder="YYYYMMDD" pattern="\d*">
+        <label>國曆生日 (如 19990401)</label>
+        <input type="number" id="birthDate" placeholder="YYYYMMDD">
     </div>
     <div class="input-group">
-        <label>輸入出生時間 (如 1155)</label>
-        <input type="number" id="birthTime" placeholder="HHMM" pattern="\d*">
+        <label>出生時間 (如 1155)</label>
+        <input type="number" id="birthTime" placeholder="HHMM">
     </div>
 
     <button onclick="calculate()">即刻排盤 • 窺探天機</button>
@@ -126,10 +44,10 @@
         <div id="lunarDate"></div>
         
         <div class="bazi-grid">
-            <div class="bazi-item"><div class="bazi-label">年柱</div><div id="yearGZ" class="bazi-content"></div></div>
-            <div class="bazi-item"><div class="bazi-label">月柱</div><div id="monthGZ" class="bazi-content"></div></div>
-            <div class="bazi-item"><div class="bazi-label">日柱</div><div id="dayGZ" class="bazi-content"></div></div>
-            <div class="bazi-item"><div class="bazi-label">時柱</div><div id="hourGZ" class="bazi-content"></div></div>
+            <div class="bazi-item"><div class="bazi-label">年柱</div><div id="yearGZ" class="bazi-content">--</div></div>
+            <div class="bazi-item"><div class="bazi-label">月柱</div><div id="monthGZ" class="bazi-content">--</div></div>
+            <div class="bazi-item"><div class="bazi-label">日柱</div><div id="dayGZ" class="bazi-content">--</div></div>
+            <div class="bazi-item"><div class="bazi-label">時柱</div><div id="hourGZ" class="bazi-content">--</div></div>
         </div>
         
         <div class="info-text">生肖屬相：<span id="zodiac"></span></div>
@@ -138,74 +56,53 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.min.js"></script>
 <script>
 function calculate() {
-    // 獲取輸入
-    let dStr = document.getElementById('birthDate').value.trim();
-    let tStr = document.getElementById('birthTime').value.trim();
+    // 1. 取得數值
+    const dVal = document.getElementById('birthDate').value;
+    const tVal = document.getElementById('birthTime').value || "0000";
 
-    // 基礎驗證
-    if (dStr.length !== 8) { alert("⚠️ 請輸入8位日期（YYYYMMDD），例如：19990401"); return; }
-    
-    // 解析時間
-    const year = parseInt(dStr.substring(0, 4));
-    const month = parseInt(dStr.substring(4, 6));
-    const day = parseInt(dStr.substring(6, 8));
-    const hour = parseInt(tStr.substring(0, 2) || 0);
-    const min = parseInt(tStr.substring(2, 4) || 0);
+    if (dVal.length !== 8) { alert("請輸入8位數日期"); return; }
 
-    // 防呆：驗證有效日期
-    const dateObj = new Date(year, month - 1, day, hour, min);
-    if (dateObj.getFullYear() !== year || dateObj.getMonth() + 1 !== month || dateObj.getDate() !== day) {
-        alert("⚠️ 日期格式錯誤，或該日期不存在。"); return;
+    const y = parseInt(dVal.substring(0, 4));
+    const m = parseInt(dVal.substring(4, 6));
+    const d = parseInt(dVal.substring(6, 8));
+    const h = parseInt(tVal.substring(0, 2) || 0);
+    const min = parseInt(tVal.substring(2, 4) || 0);
+
+    try {
+        // 2. 使用 Solar 類別進行轉換
+        const solar = Solar.fromYmdHms(y, m, d, h, min, 0);
+        const lunar = solar.getLunar();
+        const eightChar = lunar.getEightChar();
+
+        // 3. 顯示結果區塊
+        document.getElementById('result').style.display = 'block';
+        
+        // 填入農曆與生肖
+        document.getElementById('lunarDate').innerText = `農曆：${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+        document.getElementById('zodiac').innerText = `${lunar.getYearShengXiao()} (${lunar.getYearShengXiaoByGanzhi()})`;
+        
+        // 填入年月日時柱 (核心修正處)
+        document.getElementById('yearGZ').innerText = eightChar.getYear();
+        document.getElementById('monthGZ').innerText = eightChar.getMonth();
+        document.getElementById('dayGZ').innerText = eightChar.getDay();
+        document.getElementById('hourGZ').innerText = eightChar.getTime();
+
+        // 4. 受生經與星君對應
+        const nianGan = eightChar.getYear().substring(0, 1);
+        const ssMap = { "甲":"三萬三千貫","乙":"四萬貫","丙":"三萬八千貫","丁":"七萬貫","戊":"五萬四千貫","己":"九萬貫","庚":"五萬一千貫","辛":"三萬二千貫","壬":"七萬二千貫","癸":"五萬貫" };
+        document.getElementById('shouSheng').innerHTML = `<b style="color:var(--accent-gold);">受生錢：</b>${ssMap[nianGan] || "查無資料"}`;
+
+        const nianZhi = eightChar.getYear().substring(1, 2);
+        const starMap = { "子":"貪狼","丑":"巨門","寅":"祿存","卯":"文曲","辰":"廉貞","巳":"武曲","午":"破軍","未":"貪狼","申":"巨門","酉":"祿存","戌":"文曲","亥":"廉貞" };
+        document.getElementById('starLord').innerHTML = `<b style="color:var(--accent-gold);">本命星君：</b>${starMap[nianZhi] || "查無資料"}`;
+
+    } catch (err) {
+        alert("日期或時間格式錯誤，請重新確認！");
+        console.error(err);
     }
-
-    // 使用 Lunar 庫計算
-    const solar = Solar.fromDate(dateObj);
-    const lunar = solar.getLunar();
-    const eightChar = lunar.getEightChar();
-
-    // 顯示結果區塊
-    document.getElementById('result').style.display = 'block';
-    
-    // 1. 農曆日期與生肖
-    document.getElementById('lunarDate').innerText = `農曆：${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
-    document.getElementById('zodiac').innerText = `${lunar.getYearShengXiao()} (${lunar.getYearShengXiaoByGanzhi()})`;
-    
-    // 2. 八字干支
-    document.getElementById('yearGZ').innerText = eightChar.getYear();
-    document.getElementById('monthGZ').innerText = eightChar.getMonth();
-    document.getElementById('dayGZ').innerText = eightChar.getDay();
-    document.getElementById('hourGZ').innerText = eightChar.getTime();
-
-    // 3. 受生經對照 (依年天干)
-    const gan = eightChar.getYear().substring(0, 1);
-    const shouShengMap = {
-        "甲": "欠錢三萬三千貫，曹官姓李。", "乙": "欠錢四萬貫，曹官姓楊。",
-        "丙": "欠錢三萬八千貫，曹官姓龐。", "丁": "欠錢七萬貫，曹官姓程。",
-        "戊": "欠錢五萬四千貫，曹官姓郭。", "己": "欠錢九萬貫，曹官姓孫。",
-        "庚": "欠錢五萬一千貫，曹官姓李。", "辛": "欠錢三萬二千貫，曹官姓張。",
-        "壬": "欠錢七萬二千貫，曹官姓許。", "癸": "欠錢五萬貫，曹官姓柯。"
-    };
-    document.getElementById('shouSheng').innerHTML = `<b style="color:var(--accent-gold);">受生錢：</b>${shouShengMap[gan] || "查無資料"}`;
-
-    // 4. 本命星君對照 (依年地支)
-    const zhi = eightChar.getYear().substring(1, 2);
-    const starMap = {
-        "子": "北斗陽明貪狼太星君", "丑": "北斗陰精巨門元星君",
-        "寅": "北斗真人祿存真星君", "卯": "北斗玄冥文曲紐星君",
-        "辰": "北斗丹元廉貞綱星君", "巳": "北斗北極武曲紀星君",
-        "午": "北斗天關破軍關星君", "未": "北斗陽明貪狼太星君",
-        "申": "北斗陰精巨門元星君", "酉": "北斗真人祿存真星君",
-        "戌": "北斗玄冥文曲紐星君", "亥": "北斗丹元廉貞綱星君"
-    };
-    document.getElementById('starLord').innerHTML = `<b style="color:var(--accent-gold);">本命星君：</b>${starMap[zhi] || "查無資料"}`;
-    
-    // 滾動到結果
-    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
 }
 </script>
-
 </body>
 </html>
